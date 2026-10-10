@@ -1,0 +1,9 @@
+"method_id","label","engine","robust","mfpca_scatter","extra","include","provenance","include_b","m_invariant"
+"M1","MRKCFC (current)","MRKCFC::MKCFC",TRUE,"moment",NA,TRUE,"the paper's own",TRUE,FALSE
+"M2","MRKCFC-R2 (new)","MRKCFC::MKCFC",TRUE,"sign",NA,TRUE,"the proposed method",TRUE,FALSE
+"M3","MKCFC","MRKCFC::MKCFC",FALSE,"moment",NA,TRUE,"the paper's own",TRUE,FALSE
+"M4","MFPCA + mclust GMM","mclust::Mclust",FALSE,NA,"G=2",TRUE,"MFPCA followed by Gaussian mixture modelling",FALSE,FALSE
+"M5","MFPCA + k-means","stats::kmeans",FALSE,NA,"centers=2",TRUE,"functional k-means, as the sparse-data analogue",FALSE,FALSE
+"M6","MRFPCA + k-means","stats::kmeans",TRUE,NA,"centers=2",TRUE,"ablation; isolates what the K-centers loop buys",FALSE,FALSE
+"M7","lcmm multlcmm","lcmm::multlcmm",NA,NA,"ng=2",TRUE,"latent class mixed models. include=FALSE for exploratory rounds only: it never converges on this design, returns chance, and costs 38 percent of the per-cell budget. Set TRUE for the reportable run, where the non-convergence IS the result.",FALSE,TRUE
+"M8","t-mixture on MFPCA scores","teigen::teigen",FALSE,NA,"Gs=2",TRUE,"robust model-based clustering; mclust's family with t components",TRUE,FALSE

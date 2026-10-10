@@ -1,0 +1,13 @@
+scenario_id,arm,arm_label,d,skew,ex_kurt,moments,arm_eps,arm_k,arm_nu
+A01,1,Gaussian,1.5,0,0,all finite,NA,NA,NA
+A02,1,Gaussian,3,0,0,all finite,NA,NA,NA
+A03,2,"Fleishman(0, 4)",1.5,0,4,all finite,NA,NA,NA
+A04,2,"Fleishman(0, 4)",3,0,4,all finite,NA,NA,NA
+A05,3,"Fleishman(1.5, 4)",1.5,1.5,4,all finite,NA,NA,NA
+A06,3,"Fleishman(1.5, 4)",3,1.5,4,all finite,NA,NA,NA
+A07,4,"Contaminated normal",1.5,0,16.96,all finite,0.05,5,NA
+A08,4,"Contaminated normal",3,0,16.96,all finite,0.05,5,NA
+A09,5,"t, nu = 3",1.5,0,Inf,variance finite,NA,NA,3
+A10,5,"t, nu = 3",3,0,Inf,variance finite,NA,NA,3
+A11,6,"t, nu = 1.5",1.5,0,Inf,VARIANCE INFINITE,NA,NA,1.5
+A12,6,"t, nu = 1.5",3,0,Inf,VARIANCE INFINITE,NA,NA,1.5

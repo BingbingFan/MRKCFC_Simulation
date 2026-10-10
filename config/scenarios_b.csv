@@ -1,0 +1,14 @@
+"config_id","label","axis","arm","arm_label","d","arm_eps","arm_k","arm_nu","n","P","pi","obs_poisson_lambda","obs_min","realised_mu","redraw_frac"
+"B01","S0 baseline","baseline",4,"Contaminated normal",1.5,0.05,5,NA,500,3,"0.5,0.5",7,4,7.4,0.082
+"B02","n = 1000","n",4,"Contaminated normal",1.5,0.05,5,NA,1000,3,"0.5,0.5",7,4,7.4,0.082
+"B03","Poisson(3)","sparsity",4,"Contaminated normal",1.5,0.05,5,NA,500,3,"0.5,0.5",3,2,3.56,0.199
+"B04","Poisson(5)","sparsity",4,"Contaminated normal",1.5,0.05,5,NA,500,3,"0.5,0.5",5,2,5.18,0.04
+"B05","Poisson(10)","sparsity",4,"Contaminated normal",1.5,0.05,5,NA,500,3,"0.5,0.5",10,2,10,0
+"B06","d = 2","separation",4,"Contaminated normal",2,0.05,5,NA,500,3,"0.5,0.5",7,4,7.4,0.082
+"B07","d = 3","separation",4,"Contaminated normal",3,0.05,5,NA,500,3,"0.5,0.5",7,4,7.4,0.082
+"B08","d = 3.5","separation",4,"Contaminated normal",3.5,0.05,5,NA,500,3,"0.5,0.5",7,4,7.4,0.082
+"B09","pi = 0.7/0.3","proportions",4,"Contaminated normal",1.5,0.05,5,NA,500,3,"0.7,0.3",7,4,7.4,0.082
+"B10","pi = 0.9/0.1","proportions",4,"Contaminated normal",1.5,0.05,5,NA,500,3,"0.9,0.1",7,4,7.4,0.082
+"B11","P = 5","dimension",4,"Contaminated normal",1.5,0.05,5,NA,500,5,"0.5,0.5",7,4,7.4,0.082
+"B12","P = 10","dimension",4,"Contaminated normal",1.5,0.05,5,NA,500,10,"0.5,0.5",7,4,7.4,0.082
+"B13","Poisson(7), obs_min 2","sparsity",4,"Contaminated normal",1.5,0.05,5,NA,500,3,"0.5,0.5",7,2,7.05,0.007
