@@ -292,9 +292,12 @@ for (v in VO) {
   jac <- vapply(seq_len(ncol(p$jaccard)), function(k) fmt(p$jaccard_mean[k]), "")
   sub <- if (!is.null(S$subsample) && v %in% S$subsample$variant) {
     ss <- S$subsample[S$subsample$variant == v, ]; paste(fmt(ss$jaccard_mean), collapse = " / ") } else "---"
+  # Agreement with the reported partition over the OTHER restarts: the reported
+  # partition is one of the ten and would otherwise contribute its own 1.00.
+  tr <- p$ari_to_reported; self <- which(tr >= 1 - 1e-9)[1]; if (!is.na(self)) tr <- tr[-self]
   body <- c(body, sprintf("%s & %s [%s, %s] & %s [%s, %s] & %d\\%% & %s & %s \\\\", DISP[[v]],
                           fmt(stats::median(p$pairwise_ari)), fmt(min(p$pairwise_ari)), fmt(max(p$pairwise_ari)),
-                          fmt(stats::median(p$ari_to_reported)), fmt(min(p$ari_to_reported)), fmt(max(p$ari_to_reported)),
+                          fmt(stats::median(tr)), fmt(min(tr)), fmt(max(tr)),
                           round(100 * p$modal_share), paste(jac, collapse = " / "), sub))
   cat(sprintf("STAB %-10s pairwise ARI median %.3f [%.3f, %.3f]; vs reported %.3f; modal %d%%; Jaccard %s; subsample %s\n", v,
               stats::median(p$pairwise_ari), min(p$pairwise_ari), max(p$pairwise_ari), stats::median(p$ari_to_reported),
@@ -305,6 +308,7 @@ put(env("Stability of the $K=2$ partitions",
         "Method & Pairwise aRI, median [min, max] & aRI to reported, median [min, max] & Modal share & Jaccard, restarts (class 1 / 2) & Jaccard, subsamples (class 1 / 2) \\\\",
         body,
         paste("Primary analysis: ten random initializations and 100 subsamples of 80 per cent of the patients.",
+              "The agreement with the reported partition is over the other nine restarts.",
               "Cluster-wise Jaccard follows Hennig (2007): the mean, over restarts or over subsample draws, of the",
               "Jaccard similarity between each reported class and its best-matching class in the refit. The subsample refits start from the",
               "reported partition restricted to the draw, so they remove initialization noise and are optimistic relative to a full bootstrap;",
