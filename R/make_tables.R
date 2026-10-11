@@ -240,24 +240,24 @@ if (!is.null(A)) {
     k <- gA(s, m, "n_fits")
     if (is.na(k) || k >= REPS) "" else nrep(k)
   }
-  NOTE_N <- paste(if ("aRI_iqr" %in% names(A)) "Each cell is the median over replicates, with the interquartile range in parentheses on the line below." else "", if (is.na(REPS)) "" else sprintf(paste(
-    "Where fewer than %d of the %d fits succeeded, the cell gives the number",
+  NOTE_N <- paste(if ("aRI_iqr" %in% names(A)) IQR_SENTENCE else "", if (is.na(REPS)) "" else sprintf(paste(
+    "Where fewer than %d of the %d fits succeeded, the cell gives, on a second line, the number",
     "of replicates the median is taken over as $(N_{\\mathrm{rep}}=\\cdot)$;",
     "unmarked cells use all %d. Those medians are conditional on the method",
     "converging and the excluded replicates are not a random subset, so a",
     "marked cell is not directly comparable with an unmarked one."),
     REPS, REPS, REPS))
 
-  # Two lines per cell: the median (bold where best), then the IQR with the
-  # N_rep mark. On one line the eight columns overrun the rotated page.
+  # "median (IQR)" on one line; the N_rep mark, where a cell has one, on a
+  # second line, so that the eight columns fit the rotated page.
   twoline <- function(top, bottom)
     sprintf("\\begin{tabular}[t]{@{}r@{}}%s\\\\%s\\end{tabular}", top, bottom)
   cellA <- function(s, col, lower) {
     v   <- vapply(mA, function(m) gA(s, m, col), numeric(1))
     q   <- vapply(mA, function(m) gAi(s, m, col), numeric(1))
-    med <- best(v, lower)
+    med <- best(v, lower, iqr = q)
     nm  <- vapply(mA, function(m) nmark(s, m), character(1))
-    ifelse(is.na(v) | is.na(q), paste0(med, nm), twoline(med, paste0("(", fmt(q, 3), ")", nm)))
+    ifelse(nm == "", med, twoline(med, trimws(nm)))
   }
   tabA <- function(col, cap, lab, lower = FALSE) env(paste(cap, NOTE_N), lab,
     paste0("l", strrep("r", length(mA))),
