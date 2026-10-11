@@ -741,7 +741,7 @@ if (!is.null(E)) {
     "the moment scatter. The truncation is a property of the measurement, not",
     "of the fit, and is held fixed on both sides so that the target does not",
     "move. Leading-3 is the headline because it is the only well-conditioned",
-    "cut in this design: the relative eigen-gaps of $Z$ are 6.4 per cent below",
+    "cut in this design: the relative eigen-gaps of $\\boldsymbol{Z}$ are 6.4 per cent below",
     "the second component, 48 per cent below the third and 15 per cent below",
     "the fourth, and by Davis--Kahan the error in an estimated eigen-subspace",
     "scales as perturbation over eigen-gap.",
