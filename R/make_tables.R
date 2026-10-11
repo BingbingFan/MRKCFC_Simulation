@@ -254,7 +254,7 @@ if (!is.null(A)) {
   # bold phrases, no dashes, no questions.
   wr("tab_studyA_ari.tex", tabA("aRI", sprintf(paste(
     "Median adjusted Rand index by scenario. $n=500$, $M=%s$,",
-    "$\\texttt{obs\\_min}=4$, $\\texttt{maxIter}=100$, $\\texttt{conv.prop}=0$;",
+    "at least four visits per subject, an iteration cap of 100 and a reclassification threshold of zero;",
     "best per row in bold."), MM), "tab:studyA-ari"))
   wr("tab_studyA_ccr.tex", tabA("CCR", sprintf(paste(
     "Median correct classification rate by scenario. $n=500$, $M=%s$;",
@@ -279,7 +279,7 @@ if (!is.null(A)) {
     mF <- intersect(c("M1", "M2", "M3"), mA)
     wr("tab_studyA_convergence.tex", env(paste(
       "Convergence rate of the K-centers loop by scenario. $n=500$, $M=4$,",
-      "$\\texttt{conv.prop}=0$, $\\texttt{maxIter}=100$. A low rate reflects a",
+      "a reclassification threshold of zero and an iteration cap of 100. A low rate reflects a",
       "few boundary subjects reassigning indefinitely rather than an unsettled",
       "partition: relaxing the threshold raises the rate by 0.04 to 0.52",
       "wherever it was below one, and the partitions still agree with the",
@@ -357,6 +357,7 @@ if (!is.null(B)) {
     # scenarios_b.csv); say so in the label, as B13 already does (2026-10-09).
     if (identical(sb$axis[i], "sparsity") && as.integer(sb$obs_min[i]) == 2L && !grepl("obs_min", lab))
       lab <- paste0(lab, ", obs_min 2")
+    lab <- sub("obs_min 2", "at least 2 visits", lab, fixed = TRUE)
     gsub("([%&#_])", "\\\\\\1", lab)
   }
 
@@ -392,8 +393,8 @@ if (!is.null(B)) {
   if ("conv_rate" %in% names(B))
     wr("tab_studyB_convergence.tex", env(paste(
       "Convergence rate of the K-centers loop under the one-factor perturbations of Table~\\ref{tab:studyB-ari}.",
-      "$n=500$, $M=4$, 50 replicates, $\\texttt{conv.prop}=0$,",
-      "$\\texttt{maxIter}=100$. Rates are reported beside the accuracy they",
+      "$n=500$, $M=4$, 50 replicates, a reclassification threshold of zero and",
+      "an iteration cap of 100. Rates are reported beside the accuracy they",
       "qualify and are not used to filter results. teigen is omitted: it has no",
       "reclassification loop, and the replicates in which it returned no model",
       "appear as $N_{\\mathrm{rep}}$ in Table~\\ref{tab:studyB-ari}."),
@@ -440,7 +441,7 @@ if (!is.null(S)) {
       "Convergence rate by retained component count.",
       "Averaged over the twelve scenarios, $n=500$, 25 replicates. For the two",
       "robust methods $M\\geq5$ is not reportable: the median iteration count",
-      "sits on the $\\texttt{maxIter}=100$ cap, so accuracy measured there is an",
+      "sits on the cap of 100 iterations, so accuracy measured there is an",
       "artifact of where the loop was stopped. $M=4$ is the largest usable value",
       "for them, and is also what the variance-explained rule selects; MKCFC",
       "converges at every $M$."),
@@ -519,7 +520,7 @@ if (!is.null(C4)) {
   wr("tab_c4b_agree.tex", env(paste(
     "Agreement between the strict and relaxed convergence thresholds.",
     "$n=500$, $M=4$, 25 replicates. Every fit is scored against the",
-    "$\\texttt{conv.prop}=0$ partition from the same replicate; a value near 1",
+    "partition fitted with a reclassification threshold of zero from the same replicate; a value near 1",
     "means relaxing the threshold left the partition unchanged. Agreement is",
     "0.90 to 1.00 throughout, while the convergence rate rises by 0.04 to 0.52",
     "at the loosest setting wherever it was below one, and the median adjusted",
@@ -527,11 +528,11 @@ if (!is.null(C4)) {
     "infinite-variance arm, where the replicate distribution is bimodal and the",
     "medians of MRKCFC-M and MKCFC shift by up to 0.19 and 0.33; the loop was",
     "reassigning a handful of boundary subjects indefinitely rather than failing",
-    "to settle. $\\texttt{conv.prop}=0$ remains the reported setting; the relaxed",
+    "to settle. A threshold of zero remains the reported setting; the relaxed",
     "columns are a sensitivity analysis, not a redefinition of convergence."),
     "tab:c4b-agree", paste0("ll", strrep("r", nA + length(CP))),
     paste0("Method & Scenario & \\multicolumn{", nA,
-           "}{c}{Agreement with $\\texttt{conv.prop}=0$} & \\multicolumn{",
+           "}{c}{Agreement with the zero-threshold fit} & \\multicolumn{",
            length(CP), "}{c}{Convergence rate}", EOL,
            sprintf(" \\cmidrule(lr){3-%d}\\cmidrule(lr){%d-%d} ",
                    2L + nA, 3L + nA, 2L + nA + length(CP)),
