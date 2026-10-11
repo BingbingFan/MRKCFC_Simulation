@@ -92,16 +92,18 @@ mlab <- c(M1 = "MRKCFC-M", M2 = "MRKCFC-S", M3 = "MKCFC", M4 = "mclust",
           M5 = "$k$-means", M6 = "R$k$-means", M7 = "lcmm", M8 = "teigen")
 EOL <- " \\\\"                     # the LaTeX row terminator, written once
 source(file.path("R", "table_abbr.R"))   # abbr_footnote(): the abbreviation note
+source(file.path("R", "table_iqr.R"))    # iqr_of(), check_median(), fmtq(): median (IQR) cells
 
 wr <- function(file, lines) {
   writeLines(lines, file.path(OUT, file)); cat(sprintf("  WROTE %s\n", file))
 }
 fmt <- function(x, d = 3) ifelse(is.na(x), "---", formatC(x, format = "f", digits = d))
 # Bold the best in a row; `lower` flips the direction.
-best <- function(v, lower = FALSE, d = 3) {
+best <- function(v, lower = FALSE, d = 3, iqr = NULL) {
   s <- fmt(v, d)
   k <- if (all(is.na(v))) NA else if (lower) which.min(v) else which.max(v)
   if (!is.na(k)) s[k] <- paste0("\\textbf{", s[k], "}")
+  if (!is.null(iqr)) s <- paste0(s, ifelse(is.na(v) | is.na(iqr), "", paste0(" (", fmt(iqr, d), ")")))
   s
 }
 # THE FLOAT WRAPPER IS SET HERE AND NOWHERE ELSE. The manuscript \input{}s these
@@ -177,6 +179,10 @@ numify <- function(d, cols) {
     if (is.numeric(d[[cc]])) next
     lead <- sub("^\\s*([-+0-9.eE]+).*$", "\\1", as.character(d[[cc]]))
     v <- suppressWarnings(as.numeric(lead))
+    s <- as.character(d[[cc]])
+    pq <- sub("^[^(]*\\(([-+0-9.eE]+)\\).*$", "\\1", s)
+    pv <- suppressWarnings(as.numeric(pq)); pv[!grepl("(", s, fixed = TRUE)] <- NA
+    if (any(!is.na(pv))) d[[paste0(cc, "_iqr")]] <- pv   # "median (IQR)" strings from combine.R
     if (all(is.na(v)) && any(nzchar(as.character(d[[cc]]))))
       stop(sprintf("cannot parse a number from column '%s' (e.g. '%s'). ",
                    cc, as.character(d[[cc]])[1]),
@@ -220,6 +226,7 @@ if (!is.null(A)) {
   scA <- intersect(names(slab), unique(A$scenario_id))
   mA  <- intersect(names(mlab), unique(A$method_id))
   gA  <- function(s, m, col) cellf(A, col, A$scenario_id == s, A$method_id == m)
+  gAi <- function(s, m, col) if (paste0(col, "_iqr") %in% names(A)) gA(s, m, paste0(col, "_iqr")) else NA_real_
 
   # SURVIVORSHIP MARKER. Every median here is taken over the replicates on which
   # that method returned a partition, so a cell built from 89 fits is not
@@ -233,19 +240,20 @@ if (!is.null(A)) {
     k <- gA(s, m, "n_fits")
     if (is.na(k) || k >= REPS) "" else nrep(k)
   }
-  NOTE_N <- if (is.na(REPS)) "" else sprintf(paste(
+  NOTE_N <- paste(if ("aRI_iqr" %in% names(A)) IQR_SENTENCE else "", if (is.na(REPS)) "" else sprintf(paste(
     "Where fewer than %d of the %d fits succeeded, the cell gives the number",
     "of replicates the median is taken over as $(N_{\\mathrm{rep}}=\\cdot)$;",
     "unmarked cells use all %d. Those medians are conditional on the method",
     "converging and the excluded replicates are not a random subset, so a",
     "marked cell is not directly comparable with an unmarked one."),
-    REPS, REPS, REPS)
+    REPS, REPS, REPS))
 
   tabA <- function(col, cap, lab, lower = FALSE) env(paste(cap, NOTE_N), lab,
     paste0("l", strrep("r", length(mA))),
     paste0("Scenario & ", paste(mlab[mA], collapse = " & "), EOL),
     vapply(scA, function(s) paste0(slab[[s]], " & ", paste(paste0(
-      best(vapply(mA, function(m) gA(s, m, col), numeric(1)), lower),
+      best(vapply(mA, function(m) gA(s, m, col), numeric(1)), lower,
+           iqr = vapply(mA, function(m) gAi(s, m, col), numeric(1))),
       vapply(mA, function(m) nmark(s, m), character(1))),
       collapse = " & "), EOL), character(1)))
 
@@ -345,6 +353,7 @@ if (!is.null(B)) {
   axcol <- albl[ord$axis]
   axcol[duplicated(ord$axis)] <- ""
   gB  <- function(cc, m, col) cellf(B, col, B$config_id == cc, B$method_id == m)
+  gBi <- function(cc, m, col) if (paste0(col, "_iqr") %in% names(B)) gB(cc, m, paste0(col, "_iqr")) else NA_real_
   REPSB <- max(B$n_fits, na.rm = TRUE)
   nmarkB <- function(cc, m) {
     k <- gB(cc, m, "n_fits")
@@ -378,12 +387,14 @@ if (!is.null(B)) {
     sprintf("%d", REPSB), "fits succeeded,",
     "the cell gives the number of replicates the median is taken over as",
     "$(N_{\\mathrm{rep}}=\\cdot)$; those medians are conditional on convergence",
-    "and the excluded replicates are not a random subset. Best per row in bold."),
+    "and the excluded replicates are not a random subset. Best per row in bold.",
+    if ("aRI_iqr" %in% names(B)) IQR_SENTENCE else ""),
     "tab:studyB-ari", paste0("ll", strrep("r", length(mB))),
     paste0("Axis & Configuration & ", paste(mlab[mB], collapse = " & "), EOL),
     vapply(seq_along(cB), function(i) { cc <- cB[i]; paste0(
       axcol[i], " & ", rowlab(cc), " & ",
-      paste(paste0(best(vapply(mB, function(m) gB(cc, m, "aRI"), numeric(1)), FALSE),
+      paste(paste0(best(vapply(mB, function(m) gB(cc, m, "aRI"), numeric(1)), FALSE,
+                        iqr = vapply(mB, function(m) gBi(cc, m, "aRI"), numeric(1))),
                    vapply(mB, function(m) nmarkB(cc, m), character(1))),
             collapse = " & "), EOL) }, character(1))))
 
@@ -508,13 +519,20 @@ if (!is.null(C4)) {
   mC  <- intersect(c("M1", "M2", "M3"), unique(C4$method_id))
   gC  <- function(s, m, cp, col) cellf(C4, col, C4$scenario_id == s,
                                        C4$method_id == m, C4$conv_prop == cp)
+  C4R <- grab("c4b_raw.csv")
+  if (!is.null(C4R)) C4R <- unlabel(C4R)
+  gCi4 <- function(s, m, cp) {
+    if (is.null(C4R)) return(NA_real_)
+    x <- C4R$agree_strict[C4R$scenario_id == s & C4R$method_id == m & C4R$conv_prop == cp]
+    check_median(x, gC(s, m, cp, "agree_strict"), paste("thresholds", s, m, cp)); iqr_of(x)
+  }
   nA  <- length(CP) - 1L            # agreement columns: the relaxed ones only
   body <- unlist(lapply(mC, function(m) vapply(scC, function(s) paste0(
     if (s == scC[1]) mlab[[m]] else "", " & ", s, " & ",
     # Agreement is measured against the strict fit, so its own column would be 1
     # by construction and is omitted.
-    paste(fmt(vapply(CP[-1], function(cp) gC(s, m, cp, "agree_strict"),
-                     numeric(1)), 3), collapse = " & "), " & ",
+    paste(fmtq(vapply(CP[-1], function(cp) gC(s, m, cp, "agree_strict"), numeric(1)),
+               vapply(CP[-1], function(cp) gCi4(s, m, cp), numeric(1)), 3), collapse = " & "), " & ",
     paste(fmt(vapply(CP, function(cp) gC(s, m, cp, "conv_rate"),
                      numeric(1)), 2), collapse = " & "), EOL), character(1))))
   wr("tab_c4b_agree.tex", env(paste(
@@ -529,7 +547,8 @@ if (!is.null(C4)) {
     "medians of MRKCFC-M and MKCFC shift by up to 0.19 and 0.33; the loop was",
     "reassigning a handful of boundary subjects indefinitely rather than failing",
     "to settle. A threshold of zero remains the reported setting; the relaxed",
-    "columns are a sensitivity analysis, not a redefinition of convergence."),
+    "columns are a sensitivity analysis, not a redefinition of convergence.",
+    if (!is.null(C4R)) "For the agreement, each cell is the median over replicates, with the interquartile range in parentheses." else ""),
     "tab:c4b-agree", paste0("ll", strrep("r", nA + length(CP))),
     paste0("Method & Scenario & \\multicolumn{", nA,
            "}{c}{Agreement with the zero-threshold fit} & \\multicolumn{",
@@ -559,11 +578,17 @@ if (!is.null(C1)) {
   stC <- intersect(ord, unique(C1$start))
   scC <- intersect(names(slab), unique(C1$scenario_id))
   gC1 <- function(s, st, col) cellf(C1, col, C1$scenario_id == s, C1$start == st)
+  C1R <- grab("c1_raw.csv")
+  gC1i <- function(s, st) {
+    if (is.null(C1R)) return(NA_real_)
+    x <- C1R$aRI[C1R$scenario_id == s & C1R$start == st]
+    check_median(x, gC1(s, st, "aRI"), paste("initialization", s, st)); iqr_of(x)
+  }
   cellS9 <- function(s, st) {
     v <- gC1(s, st, "aRI"); ok <- gC1(s, st, "n_ok"); at <- gC1(s, st, "n_attempt")
     # No dagger: the returned/attempted count beside the median already says
     # that the median is over fewer fits than were attempted.
-    paste0(if (is.na(v)) "---" else fmt(v, 3), " & ",
+    paste0(if (is.na(v)) "---" else fmtq(v, gC1i(s, st), 3), " & ",
            sprintf("%.0f/%.0f", ok, at))
   }
   wr("tab_c1_init.tex", env(paste(
@@ -578,7 +603,7 @@ if (!is.null(C1)) {
     "infinite-variance scenario. Across 400 attempts the random restarts never",
     "abort. Selecting among 20 restarts by the algorithm's own objective, which",
     "uses no knowledge of the truth, also beats starting from the true labels",
-    "on both scenarios."),
+    "on both scenarios.", if (!is.null(C1R)) IQR_SENTENCE else ""),
     "tab:c1-init", paste0("l", strrep("rr", length(scC))),
     paste0("Starting strategy & ",
            paste(sprintf("\\multicolumn{2}{c}{%s}", slab[scC]), collapse = " & "), EOL,
@@ -674,10 +699,17 @@ if (!is.null(C2)) {
   cfgC <- intersect(names(clbl), unique(C2$config_id))
   gC <- function(cc, m, b, col)
     cellf(C2, col, C2$config_id == cc, C2$method_id == m, C2$basis == b)
+  C2R <- grab("c2_raw.csv")
+  gCi <- function(cc, m, b) {
+    if (is.null(C2R)) return(NA_real_)
+    x <- C2R$aRI[C2R$config_id == cc & C2R$method_id == m & C2R$basis == b & is.na(C2R$error)]
+    x <- x[!is.na(x) & x > 0.5]
+    check_median(x, gC(cc, m, b, "aRI_med_success"), paste("basis", cc, m, b)); iqr_of(x)
+  }
   pct <- function(x) if (is.na(x)) "---" else sprintf("%.0f\\%%", 100 * x)
   cell <- function(cc, m, b) {
     r <- gC(cc, m, b, "success_rate"); v <- gC(cc, m, b, "aRI_med_success")
-    paste0(pct(r), " & ", if (is.na(v)) "---" else fmt(v, 3))
+    paste0(pct(r), " & ", if (is.na(v)) "---" else fmtq(v, gCi(cc, m, b), 3))
   }
   wr("tab_c2_basis.tex", env(paste(
     "Class-specific against class-common eigenfunctions.",
@@ -690,7 +722,8 @@ if (!is.null(C2)) {
     "holds more than half the mass and moves discontinuously with it.",
     "A class-common basis is misspecified by construction here, since the",
     "design gives two of the three variables class-specific eigenfunctions;",
-    "the direction is expected and the magnitude is the result."),
+    "the direction is expected and the magnitude is the result.",
+    if (!is.null(C2R)) "For the medians among the recovered replicates, the interquartile range over those replicates is in parentheses." else ""),
     "tab:c2-basis", paste0("ll", strrep("r", 4)),
     paste0("Configuration & Method & \\multicolumn{2}{c}{Class-specific} & ",
            "\\multicolumn{2}{c}{Class-common}", EOL,
@@ -711,6 +744,12 @@ if (!is.null(E)) {
   vE  <- intersect(names(vlab), unique(E$variant))
   scE <- intersect(names(slab), unique(E$scenario_id))
   gE  <- function(s, v, col) cellf(E, col, E$scenario_id == s, E$variant == v)
+  ER  <- grab("estim_raw.csv")
+  gEi <- function(s, v, col) {
+    if (is.null(ER)) return(NA_real_)
+    x <- ER[[col]][ER$scenario_id == s & ER$variant == v]
+    check_median(x, gE(s, v, col), paste("estimation", s, v, col)); iqr_of(x)
+  }
   # ELLIPTICITY GATES THE CLAIM. The SSCM's eigenvectors coincide with the
   # covariance's only for elliptically symmetric distributions, and arms 2 and 3
   # (Fleishman via Vale-Maurelli) are not elliptical. Reporting them anyway is
@@ -721,7 +760,8 @@ if (!is.null(E)) {
     vapply(scE, function(s) paste0(
       if (cellf(E, "arm", E$scenario_id == s) %in% c(2, 3)) "no" else "yes",
       " & ", slab[[s]], " & ", paste(best(
-        vapply(vE, function(v) gE(s, v, col), numeric(1)), lower, 2),
+        vapply(vE, function(v) gE(s, v, col), numeric(1)), lower, 2,
+        iqr = vapply(vE, function(v) gEi(s, v, col), numeric(1))),
         collapse = " & "), EOL), character(1)))
 
   # THE TRUNCATION IS A PROPERTY OF THE MEASUREMENT, NOT OF THE FIT. Every fit
@@ -763,7 +803,7 @@ if (!is.null(E)) {
     "scatter, and the two blocks repeat the same three columns.",
     "The guarantee of Proposition~\\ref{prop1} applies only under elliptical",
     "symmetry, which the two Fleishman arms do not satisfy; those rows are reported",
-    "rather than omitted."), "tab:estim-angle",
+    "rather than omitted.", if (!is.null(ER)) IQR_SENTENCE else ""), "tab:estim-angle",
     paste0("ll", strrep("r", nv * length(ANG))),
     # SHORT sub-headers. Repeating "(moment)"/"(sign)" across both blocks ran the
     # eight-column table 3.07pt over the text width; the scatter each method uses
@@ -778,16 +818,17 @@ if (!is.null(E)) {
       if (cellf(E, "arm", E$scenario_id == s) %in% c(2, 3)) "no" else "yes",
       " & ", slab[[s]], " & ",
       paste(vapply(names(ANG), function(cl) paste(best(
-        vapply(vE, function(v) gE(s, v, cl), numeric(1)), TRUE, 2),
+        vapply(vE, function(v) gE(s, v, cl), numeric(1)), TRUE, 2,
+        iqr = vapply(vE, function(v) gEi(s, v, cl), numeric(1))),
         collapse = " & "), character(1)), collapse = " & "), EOL), character(1))))
   if ("score_cc" %in% names(E))
     wr("tab_estim_cc.tex", tabE("score_cc", paste(
       "Canonical correlation between the estimated and true scores.",
-      "Mean canonical correlation, fitted on the true partition, $n=500$, $M=4$;",
+      "The mean canonical correlation over the components, fitted on the true partition, $n=500$, $M=4$;",
       "higher is better, best per row in bold.",
       "Canonical correlation is invariant to any nonsingular linear transform of",
       "either set, so it does not depend on resolving the near-tied eigenvalues",
-      "that make the eigenfunction angles ill-conditioned."),
+      "that make the eigenfunction angles ill-conditioned.", if (!is.null(ER)) IQR_SENTENCE else ""),
       "tab:estim-cc", lower = FALSE))
 }
 

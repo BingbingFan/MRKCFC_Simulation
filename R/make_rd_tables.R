@@ -292,16 +292,17 @@ for (v in VO) {
   jac <- vapply(seq_len(ncol(p$jaccard)), function(k) fmt(p$jaccard_mean[k]), "")
   sub <- if (!is.null(S$subsample) && v %in% S$subsample$variant) {
     ss <- S$subsample[S$subsample$variant == v, ]; paste(fmt(ss$jaccard_mean), collapse = " / ") } else "---"
-  body <- c(body, sprintf("%s & %s [%s, %s] & %s & %d\\%% & %s & %s \\\\", DISP[[v]],
+  body <- c(body, sprintf("%s & %s [%s, %s] & %s [%s, %s] & %d\\%% & %s & %s \\\\", DISP[[v]],
                           fmt(stats::median(p$pairwise_ari)), fmt(min(p$pairwise_ari)), fmt(max(p$pairwise_ari)),
-                          fmt(stats::median(p$ari_to_reported)), round(100 * p$modal_share), paste(jac, collapse = " / "), sub))
+                          fmt(stats::median(p$ari_to_reported)), fmt(min(p$ari_to_reported)), fmt(max(p$ari_to_reported)),
+                          round(100 * p$modal_share), paste(jac, collapse = " / "), sub))
   cat(sprintf("STAB %-10s pairwise ARI median %.3f [%.3f, %.3f]; vs reported %.3f; modal %d%%; Jaccard %s; subsample %s\n", v,
               stats::median(p$pairwise_ari), min(p$pairwise_ari), max(p$pairwise_ari), stats::median(p$ari_to_reported),
               round(100 * p$modal_share), paste(jac, collapse = "/"), sub))
 }
 put(env("Stability of the $K=2$ partitions",
         "tab:rd-stability", "lccccc",
-        "Method & Pairwise aRI, median [min, max] & aRI to reported, median & Modal share & Jaccard, restarts (class 1 / 2) & Jaccard, subsamples (class 1 / 2) \\\\",
+        "Method & Pairwise aRI, median [min, max] & aRI to reported, median [min, max] & Modal share & Jaccard, restarts (class 1 / 2) & Jaccard, subsamples (class 1 / 2) \\\\",
         body,
         paste("Primary analysis: ten random initializations and 100 subsamples of 80 per cent of the patients.",
               "Cluster-wise Jaccard follows Hennig (2007): the mean, over restarts or over subsample draws, of the",
@@ -348,7 +349,8 @@ sens_row <- function(stem, name) {
   for (v in VO) {
     ks <- Cs$selection[Cs$selection$variant == v, ]; kstar <- ks$K[which.max(ks$silhouette)]
     sz <- Cs$info$sizes[Cs$info$variant == v & Cs$info$K == Cs$K_star & Cs$info$restart == Cs$best$restart[Cs$best$variant == v & Cs$best$K == Cs$K_star]]
-    ari <- if (!is.null(Ss$per_variant[[v]])) fmt(stats::median(Ss$per_variant[[v]]$pairwise_ari)) else "---"
+    ari <- if (!is.null(Ss$per_variant[[v]])) { pa <- Ss$per_variant[[v]]$pairwise_ari
+      sprintf("%s [%s, %s]", fmt(stats::median(pa)), fmt(min(pa)), fmt(max(pa))) } else "---"
     # Wald P of the class term from the unrounded estimate and CI, as Table 5
     # prints it; p_cluster in the rds is the likelihood-ratio test (2026-10-10).
     hr <- if (!is.null(Vs)) { t <- Vs$table[Vs$table$method == v, ]
@@ -368,7 +370,7 @@ SENS_ARMS <- list(c("rd_log_nK3", "Log scale, $M=3$"), c("rd_log", "Log scale, $
 body <- unlist(lapply(SENS_ARMS, function(s) sens_row(s[1], s[2])))
 put(env("Sensitivity analyses",
         "tab:rd-sens", "llcccc",
-        "Analysis & Method & selected $K$ & class sizes at $K=2$ & pairwise aRI among restarts & adjusted HR (95\\% CI), Model 3, overall survival \\\\",
+        "Analysis & Method & selected $K$ & class sizes at $K=2$ & pairwise aRI among restarts, median [min, max] & adjusted HR (95\\% CI), Model 3, overall survival \\\\",
         body,
         paste("The log-transformed markers at two component counts, and a fixed covariance bandwidth.",
               "Each analysis repeats the primary procedure with one change: every marker log-transformed before normalization (at the $M=3$ the",
