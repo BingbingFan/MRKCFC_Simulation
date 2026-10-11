@@ -91,6 +91,7 @@ slab <- c(A01 = "Gaussian, $d=1.5$",           A02 = "Gaussian, $d=3$",
 mlab <- c(M1 = "MRKCFC-M", M2 = "MRKCFC-S", M3 = "MKCFC", M4 = "mclust",
           M5 = "$k$-means", M6 = "R$k$-means", M7 = "lcmm", M8 = "teigen")
 EOL <- " \\\\"                     # the LaTeX row terminator, written once
+source(file.path("R", "table_abbr.R"))   # abbr_footnote(): the abbreviation note
 
 wr <- function(file, lines) {
   writeLines(lines, file.path(OUT, file)); cat(sprintf("  WROTE %s\n", file))
@@ -137,6 +138,7 @@ env <- function(cap, lab, align, head, body) {
     "\\toprule", head, "\\midrule", body, "\\bottomrule",
     "\\end{tabular*}",
     if (!is.null(sc$note)) sprintf("\\footnotetext{%s}", sc$note),
+    abbr_footnote(c(sc$cap, head, body, sc$note)),
     if (wide) "\\end{sidewaystable}" else "\\end{table}")
 }
 # The completeness marker. The convention: never a superscript, but

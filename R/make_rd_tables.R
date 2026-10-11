@@ -26,6 +26,7 @@
 # figure shows and what the text uses. The names are DERIVED, not typed.
 
 suppressWarnings(suppressMessages({ source(file.path("R", "realdata_load.R")); library(survival) }))
+source(file.path("R", "table_abbr.R"))   # abbr_footnote(): the abbreviation note
 args   <- commandArgs(trailingOnly = TRUE)
 RD     <- if (length(args) >= 1) args[1] else file.path("..", "HPC", "V3", "rd")
 TABDIR <- if (length(args) >= 2) args[2] else file.path("..", "doc", "manu", "tables")
@@ -60,6 +61,7 @@ env  <- function(cap, lab, align, head, body, foot = NULL, size = "\\small", wid
     sprintf("\\begin{tabular*}{%s}{@{\\extracolsep{\\fill}}%s@{}}", width, align),
     "\\toprule", head, "\\midrule", body, "\\bottomrule", "\\end{tabular*}",
     if (!is.null(foot)) sprintf("\\footnotetext{%s}", foot),
+    abbr_footnote(c(cap, head, body, foot)),
     if (wide) "\\end{sidewaystable}" else "\\end{table}")
 }
 put  <- function(lines, f) { writeLines(lines, file.path(TABDIR, f)); cat("wrote", f, "\n") }
@@ -253,8 +255,7 @@ baseline_tab <- function(v, lab, cap) {
                 "Data are mean (SD) or median [IQR] for numeric variables and n (\\%) for categorical variables;",
                 "postoperative levels are each subject's median, and peaks each subject's maximum, over all measurements in the 36-month window, the preoperative measurement at month 0 included;",
                 "the reference limits are 5 ng/mL for CEA, 37 U/mL for CA19-9 and 20 U/mL for CA242. $P$ from the $t$ test (mean (SD) rows),",
-                "the Wilcoxon rank-sum test (median [IQR] rows) or the $\\chi^2$ test. BMI, body mass index; CA19-9, carbohydrate antigen 19-9;",
-                "CA242, carbohydrate antigen 242; CEA, carcinoembryonic antigen.")
+                "the Wilcoxon rank-sum test (median [IQR] rows) or the $\\chi^2$ test.")
   put(env(cap, lab, paste0("l", strrep("c", length(cl)), "c"), head, body, foot, size = "\\footnotesize"),
       sprintf("tab_rd_baseline_%s.tex", gsub("[^A-Za-z0-9]", "", v)))
 }
@@ -300,10 +301,10 @@ for (v in VO) {
 }
 put(env("Stability of the $K=2$ partitions",
         "tab:rd-stability", "lccccc",
-        "Method & Pairwise ARI, median [min, max] & ARI to reported, median & Modal share & Jaccard, restarts (class 1 / 2) & Jaccard, subsamples (class 1 / 2) \\\\",
+        "Method & Pairwise aRI, median [min, max] & aRI to reported, median & Modal share & Jaccard, restarts (class 1 / 2) & Jaccard, subsamples (class 1 / 2) \\\\",
         body,
         paste("Primary analysis: ten random initializations and 100 subsamples of 80 per cent of the patients.",
-              "ARI, adjusted Rand index. Cluster-wise Jaccard follows Hennig (2007): the mean, over restarts or over subsample draws, of the",
+              "Cluster-wise Jaccard follows Hennig (2007): the mean, over restarts or over subsample draws, of the",
               "Jaccard similarity between each reported class and its best-matching class in the refit. The subsample refits start from the",
               "reported partition restricted to the draw, so they remove initialization noise and are optimistic relative to a full bootstrap;",
               "they were run for the proposed method only. Classes are numbered as in the reported partition."),
@@ -330,7 +331,7 @@ Fv <- read.csv(file.path(RD, "rd_fve.csv"), stringsAsFactors = FALSE)
 body <- character(0)
 for (sc in unique(Fv$scale)) for (br in unique(Fv$branch)) for (m in RD_MARKERS) {
   v <- Fv$FVE[Fv$scale == sc & Fv$branch == br & Fv$marker == m]
-  body <- c(body, sprintf("%s & %s & %s & %s \\\\", sc, br, m, paste(fmt(v, 3), collapse = " & ")))
+  body <- c(body, sprintf("%s & %s & %s & %s \\\\", sc, br, sub("CA199", "CA19-9", m), paste(fmt(v, 3), collapse = " & ")))
 }
 put(env("Fraction of variance explained on the cohort",
         "tab:rd-fve", "lllcccccc", "Scale & Branch & Marker & $M=1$ & $M=2$ & $M=3$ & $M=4$ & $M=5$ & $M=6$ \\\\", body,
@@ -367,7 +368,7 @@ SENS_ARMS <- list(c("rd_log_nK3", "Log scale, $M=3$"), c("rd_log", "Log scale, $
 body <- unlist(lapply(SENS_ARMS, function(s) sens_row(s[1], s[2])))
 put(env("Sensitivity analyses",
         "tab:rd-sens", "llcccc",
-        "Analysis & Method & selected $K$ & class sizes at $K=2$ & pairwise ARI among restarts & adjusted HR (95\\% CI), Model 3, overall survival \\\\",
+        "Analysis & Method & selected $K$ & class sizes at $K=2$ & pairwise aRI among restarts & adjusted HR (95\\% CI), Model 3, overall survival \\\\",
         body,
         paste("The log-transformed markers at two component counts, and a fixed covariance bandwidth.",
               "Each analysis repeats the primary procedure with one change: every marker log-transformed before normalization (at the $M=3$ the",
