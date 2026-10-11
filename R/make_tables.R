@@ -761,7 +761,7 @@ if (!is.null(E)) {
     "MRKCFC-M and MKCFC use the moment scatter; MRKCFC-S uses the spatial-sign",
     "scatter, and the two blocks repeat the same three columns.",
     "The guarantee of Proposition~\\ref{prop1} applies only under elliptical",
-    "symmetry, which arms 2 and 3 do not satisfy; those rows are reported",
+    "symmetry, which the two Fleishman arms do not satisfy; those rows are reported",
     "rather than omitted."), "tab:estim-angle",
     paste0("ll", strrep("r", nv * length(ANG))),
     # SHORT sub-headers. Repeating "(moment)"/"(sign)" across both blocks ran the
