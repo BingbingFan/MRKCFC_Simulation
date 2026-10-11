@@ -391,7 +391,7 @@ if (!is.null(B)) {
   mBc <- intersect(c("M1", "M2", "M3"), mB)
   if ("conv_rate" %in% names(B))
     wr("tab_studyB_convergence.tex", env(paste(
-      "Convergence rate of the K-centers loop under the same perturbations.",
+      "Convergence rate of the K-centers loop under the one-factor perturbations of Table~\\ref{tab:studyB-ari}.",
       "$n=500$, $M=4$, 50 replicates, $\\texttt{conv.prop}=0$,",
       "$\\texttt{maxIter}=100$. Rates are reported beside the accuracy they",
       "qualify and are not used to filter results. teigen is omitted: it has no",
@@ -737,7 +737,7 @@ if (!is.null(E)) {
     "Degrees, fitted on the true partition, $n=500$, $M=4$; lower is better,",
     "best per row in bold. Fitting under the true partition removes the",
     "initializer, the K-centers loop and convergence, leaving only the question",
-    "of whether the spatial-sign scatter estimates the second stage better than",
+    "of whether the spatial sign scatter estimates the second stage better than",
     "the moment scatter. The truncation is a property of the measurement, not",
     "of the fit, and is held fixed on both sides so that the target does not",
     "move. Leading-3 is the headline because it is the only well-conditioned",
@@ -758,7 +758,7 @@ if (!is.null(E)) {
       "on the same first stage in all twelve scenarios at both truncations,",
       "which is the comparison this table is for. Leading-4 is reported for",
       "completeness.") else "",
-    "MRKCFC-M and MKCFC use the moment scatter; MRKCFC-S uses the spatial-sign",
+    "MRKCFC-M and MKCFC use the moment scatter; MRKCFC-S uses the spatial sign",
     "scatter, and the two blocks repeat the same three columns.",
     "The guarantee of Proposition~\\ref{prop1} applies only under elliptical",
     "symmetry, which the two Fleishman arms do not satisfy; those rows are reported",

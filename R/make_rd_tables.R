@@ -167,7 +167,7 @@ cox_tab <- function(Sv, methods, lab, cap, endpoint) {
             "\\cmidrule(lr){2-3}\\cmidrule(lr){4-5}\\cmidrule(lr){6-7}",
             "Multivariate trajectory class & HR (95\\% CI) & $P$ & HR (95\\% CI) & $P$ & HR (95\\% CI) & $P$ \\\\")
   foot <- paste0("Primary analysis: original scale, transformed time axis, $K=2$. ",
-                 "Model 1 is unadjusted. Model 2 adjusts for age, sex and the subject's median CEA, CA19-9 and CA242 over the 36-month window, the preoperative measurement included. ",
+                 "Model 1 is unadjusted. Model 2 adjusts for age, sex and the subject's median postoperative CEA, CA19-9 and CA242, each the median over the 36-month window with the preoperative measurement included. ",
                  "Model 3 adjusts for age, sex, surgical approach, primary site, tumor differentiation, TNM stage, lymph node yield, ",
                  "mucinous type, lymphovascular invasion, perineural invasion and adjuvant chemotherapy. Hazard ratios are for the ",
                  "class named against the reference class; $P$ is the Wald test of that contrast. Schoenfeld global test of ",
