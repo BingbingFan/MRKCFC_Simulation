@@ -536,7 +536,7 @@ if (!is.null(C4)) {
   }
   nA  <- length(CP) - 1L            # agreement columns: the relaxed ones only
   body <- unlist(lapply(mC, function(m) vapply(scC, function(s) paste0(
-    if (s == scC[1]) mlab[[m]] else "", " & ", s, " & ",
+    if (s == scC[1]) mlab[[m]] else "", " & ", if (s %in% names(slab)) slab[[s]] else s, " & ",
     # Agreement is measured against the strict fit, so its own column would be 1
     # by construction and is omitted.
     paste(fmtq(vapply(CP[-1], function(cp) gC(s, m, cp, "agree_strict"), numeric(1)),
@@ -764,7 +764,7 @@ if (!is.null(E)) {
   # the point: a robustness claim that holds only under ellipticity should say so.
   tabE <- function(col, cap, lab, lower) env(cap, lab,
     paste0("ll", strrep("r", length(vE))),
-    paste0("Elliptical? & Scenario & ", paste(vlab[vE], collapse = " & "), EOL),
+    paste0("Elliptical & Scenario & ", paste(vlab[vE], collapse = " & "), EOL),
     vapply(scE, function(s) paste0(
       if (cellf(E, "arm", E$scenario_id == s) %in% c(2, 3)) "no" else "yes",
       " & ", slab[[s]], " & ", paste(best(
@@ -817,7 +817,7 @@ if (!is.null(E)) {
     # eight-column table 3.07pt over the text width; the scatter each method uses
     # is stated in the caption instead, and these names now match the Study A
     # tables. Widen this header again and the table overflows.
-    paste0("Elliptical? & Scenario & ",
+    paste0("Elliptical & Scenario & ",
            paste(sprintf("\\multicolumn{%d}{c}{%s}", nv, ANG), collapse = " & "), EOL,
            paste(sprintf("\\cmidrule(lr){%d-%d}", 3L + nv * (seq_along(ANG) - 1L),
                          2L + nv * seq_along(ANG)), collapse = ""), " ",
