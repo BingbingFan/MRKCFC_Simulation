@@ -166,24 +166,12 @@ cox_tab <- function(Sv, methods, lab, cap, endpoint) {
   head <- c("& \\multicolumn{2}{c}{Model 1} & \\multicolumn{2}{c}{Model 2} & \\multicolumn{2}{c}{Model 3} \\\\",
             "\\cmidrule(lr){2-3}\\cmidrule(lr){4-5}\\cmidrule(lr){6-7}",
             "Multivariate trajectory class & HR (95\\% CI) & $P$ & HR (95\\% CI) & $P$ & HR (95\\% CI) & $P$ \\\\")
-  # Discrimination from realdata_survival.R's saved run: Harrell's C of the
-  # class-only model and the time-dependent AUC at t1 and t2 months. The note
-  # carries them so the text can hand the comparators to the table (author,
-  # 2026-10-11: "others use one sentence to say they are in the table").
-  V <- rdf("rd", sprintf("_survival_%s_adj.rds", endpoint))
-  disc <- if (is.null(V)) character(0) else vapply(methods, function(v) {
-    t <- V$table[V$table$method == v, ][1, ]
-    sprintf("%s %s (%s, %s)", DISP[[v]], fmt(t$c_index), fmt(t$auc_t1), fmt(t$auc_t2)) }, "")
-  tt <- if (is.null(V)) c(NA, NA) else c(V$t1, V$t2)
   foot <- paste0("Primary analysis: original scale, transformed time axis, $K=2$. ",
                  "Model 1 is unadjusted. Model 2 adjusts for age, sex and the subject's median postoperative CEA, CA19-9 and CA242, each the median over the 36-month window with the preoperative measurement included. ",
                  "Model 3 adjusts for age, sex, surgical approach, primary site, tumor differentiation, TNM stage, lymph node yield, ",
                  "mucinous type, lymphovascular invasion, perineural invasion and adjuvant chemotherapy. Hazard ratios are for the ",
                  "class named against the reference class; $P$ is the Wald test of that contrast. Schoenfeld global test of ",
-                 "proportional hazards in Model 3: ", paste(zph, collapse = "; "), ". ",
-                 if (length(disc)) paste0("Harrell's concordance index of the unadjusted model, with the time-dependent area under the curve at ",
-                                          tt[1], " and ", tt[2], " months in parentheses: ", paste(disc, collapse = "; "), ". ") else "",
-                 "The partitions were estimated on the same ",
+                 "proportional hazards in Model 3: ", paste(zph, collapse = "; "), ". The partitions were estimated on the same ",
                  "subjects, so the $P$ values are optimistic and support only the comparison between methods.")
   put(env(cap, lab, "lcccccc", head, body, foot, size = "\\footnotesize", wide = TRUE),
       sprintf("tab_rd_cox_%s.tex", tolower(endpoint)))
