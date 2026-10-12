@@ -130,7 +130,7 @@ The analysis runs on the original scale with the time axis transformed through
 the empirical distribution function of the visit times and the Kendall-surface
 bandwidth chosen by cross-validation (the primary arm), and again on the log
 scale at `M` = 3 and `M` = 4, and with the bandwidth fixed at 0.20 (the
-sensitivity arms of Table S22). Each arm writes to its own directory. The
+sensitivity arms of Table S21). Each arm writes to its own directory. The
 steps, in order:
 
 | Step | Scripts | Output |
@@ -140,9 +140,9 @@ steps, in order:
 | 3. Selection | `Rscript R/realdata_combine.R <outdir> <outstem> 10 4` | The restart with the smallest objective per cell, `K` by the silhouette on the multivariate scores of a global fit, the labels (Table S18) |
 | 4. Stability | `Rscript R/realdata_subsample_task.R <draw> <results-dir> <combined-stem> <outdir>` for 100 draws of 80 per cent, then `Rscript R/realdata_stability.R <results-dir> <combined-stem>` | Agreement among restarts, clusterwise Jaccard similarity over restarts and subsamples (Table S19) |
 | 5. Agreement between methods | `Rscript R/realdata_agreement.R <results-dir> <combined-stem>` | Adjusted Rand index between the partitions, including the comparators fitted on the global scores (Table S20) |
-| 6. Survival | `Rscript R/realdata_survival.R <results-dir> <combined-stem> OS 36 60 <covariates>` and the same with `RFS` | Cox models by class with and without the covariates (Tables 5 and S21) |
+| 6. Survival | `Rscript R/realdata_survival.R <results-dir> <combined-stem> OS 36 60 <covariates>` | Cox models by class with and without the covariates (Table 5) |
 | 7. Diagnostics | `Rscript R/realdata_bwprobe.R`, `Rscript R/realdata_classcheck.R <outstem> <dir>`, `Rscript R/realdata_recon_trim.R <rd-dir> <out-dir>` | Where the robust smoother can be fitted on this cohort, which classes the loop formed, and the share of the reconstruction error carried by the most extreme observations (Section 3.2) |
-| 8. Tables and figures | `Rscript R/make_rd_tables.R <rd-dir> <tables-dir> <figures-dir>` and `Rscript R/plot_fig1_traj.R <rd-dir> <out-stem>` | Table 5, Tables S15 to S22, Figures 1, 2 and S1 |
+| 8. Tables and figures | `Rscript R/make_rd_tables.R <rd-dir> <tables-dir> <figures-dir>` and `Rscript R/plot_fig1_traj.R <rd-dir> <out-stem>` | Table 5, Tables S15 to S21, Figures 1, 2 and S1 |
 
 ## License
 

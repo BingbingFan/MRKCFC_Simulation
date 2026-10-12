@@ -179,7 +179,9 @@ cox_tab <- function(Sv, methods, lab, cap, endpoint) {
 # Captions are short titles (2026-10-10); what they used to carry is
 # the first sentence of each note.
 cox_tab(S_OS,  c(VO, COMP), "table4", "Trajectory classes and overall survival", "OS")
-cox_tab(S_RFS, c(VO, COMP), "tab:rd-cox-rfs", "Trajectory classes and recurrence-free survival", "RFS")
+# The recurrence-free table is no longer part of the manuscript (author, 2026-10-11);
+# the call stays here so it can be switched back on:
+# cox_tab(S_RFS, c(VO, COMP), "tab:rd-cox-rfs", "Trajectory classes and recurrence-free survival", "RFS")
 
 # Kaplan-Meier facts for the text: deaths, median survival, 5-year survival, log-rank
 km_facts <- function(v) {
